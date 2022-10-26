@@ -1,12 +1,60 @@
 use std::{thread, time::Duration};
 
-use futures::{executor::block_on, FutureExt};
+mod Utils {
+    use std::{thread, time::Duration};
+
+    use futures::executor::block_on;
+
+
+    pub struct Loop{
+        pub temp : u64,
+        pub message : &'static str,        
+    }
+    impl Loop{
+        
+        pub fn start(self : &Self, callback: fn(&'static str)){
+            
+            let pool = async {
+
+                let mut cont = 0;
+
+                while cont <= 100 {
+    
+                    thread::sleep(Duration::from_millis(self.temp));
+                    cont += 1;
+    
+                }
+    
+                callback(self.message)
+            
+            };
+
+            block_on(pool);
+       
+        }
+    
+    }
+}
+use Utils::Loop;
 
 fn main() {
 
+    //test with async + callback
+    thread::spawn(move ||{
+
+        let x = Loop {temp:110,message:"Loop begin finished!"};
+        x.start(|message|{
+            
+            println!("{}",message);
+        
+        });
+
+    });
+        
     println!("Begin process..");
 
-    runa_all();
+    //thread with callback
+    run_all();
 
     println!("Wait progress finish!!!");
 
@@ -14,7 +62,8 @@ fn main() {
         thread::sleep(Duration::from_secs(1))
     }    
 }
-fn runa_all(){
+
+fn run_all(){
 
     println!("Starting 0!!!");
     test(100,"loop 0", |message|{
